@@ -26,7 +26,7 @@ import { ThemedText } from "@/components/ThemedText";
 import ImagePreviewDrawer from "@/components/drawer/image-preview-drawer";
 import CameraStatusIndicator from "@/components/common/camera-status-indicator";
 
-const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+const { height, width } = Dimensions.get("window");
 
 export default function Scan() {
     const [facing, setFacing] = useState<CameraType>("back");
@@ -40,7 +40,6 @@ export default function Scan() {
     const snapPoints = useMemo(() => ["50%", "80%"], []);
 
     const handleSheetChanges = useCallback((index: number) => {
-        console.log("handleSheetChanges", index);
         if (index === -1) {
             setIsCameraActive(true);
         }
@@ -128,29 +127,58 @@ export default function Scan() {
                     </TouchableOpacity>
                 </HeaderWrapper>
                 <View style={styles.camContainer}>
-                    {isCameraActive ? (
-                        <CameraView
-                            style={styles.camera}
-                            facing={facing}
-                            flash={flash}
-                            ref={cameraRef}
-                        >
-                            <CameraStatusIndicator
+                    {
+                        isCameraActive && (
+                            <CameraView
+                                style={styles.camera}
                                 facing={facing}
                                 flash={flash}
-                            />
-                        </CameraView>
-                    ) : (
-                        <View style={styles.previewBackground}>
-                            {selectedImage && (
-                                <Image
-                                    source={{ uri: selectedImage }}
-                                    style={styles.fullPreviewImage}
-                                    resizeMode="contain"
-                                />
-                            )}
-                        </View>
-                    )}
+                            >
+                                <View style={styles.innerBar}>
+                                    {/* <ThemedText>
+                                        Camera:{" "}
+                                        {facing === "back" ? "Rear" : "Front"} |
+                                        Flash: {flash === "on" ? "On" : "Off"}
+                                    </ThemedText> */}
+                                </View>
+                                <View style={styles.captureArea} >
+                                    {[...Array(3)].map((_, rowIndex) => (
+                                        <View
+                                            key={`row-${rowIndex}`}
+                                            style={styles.gridRow}
+                                        >
+                                            {[...Array(3)].map(
+                                                (_, colIndex) => (
+                                                    <View
+                                                        key={`cell-${rowIndex}-${colIndex}`}
+                                                        style={[
+                                                            styles.gridCell,
+                                                            colIndex === 0 &&
+                                                                styles.firstCell,
+                                                            colIndex === 2 &&
+                                                                styles.lastCell,
+                                                        ]}
+                                                    />
+                                                )
+                                            )}
+                                        </View>
+                                    ))}
+                                </View>
+                                <View style={styles.innerBar} />
+                            </CameraView>
+                        )
+                        // : (
+                        //     <View style={styles.previewBackground}>
+                        //         {selectedImage && (
+                        //             <Image
+                        //                 source={{ uri: selectedImage }}
+                        //                 style={styles.fullPreviewImage}
+                        //                 resizeMode="contain"
+                        //             />
+                        //         )}
+                        //     </View>
+                        // )
+                    }
                 </View>
                 <View style={styles.buttonContainer}>
                     <View style={styles.buttonContainerInner}>
@@ -200,10 +228,45 @@ const styles = StyleSheet.create({
     },
     camContainer: {
         flex: 1,
+        width: "100%",
+        height: "100%",
+        flexDirection: "column",
+        backgroundColor: "black",
     },
     camera: {
         flex: 1,
         position: "relative",
+        width: "100%",
+        height: "100%",
+    },
+    innerBar: {
+        flex: 1,
+        backgroundColor: "rgba(0, 0, 0, 0.4)",
+    },
+    captureArea: {
+        width: width,
+        height: width,
+        justifyContent: "center",
+        alignItems: "center",
+        borderTopWidth: 0.5,
+        borderBottomWidth: 0.5,
+        borderColor: "rgba(255, 255, 255, 1)",
+    },
+    gridRow: {
+        flexDirection: "row",
+        flex: 1,
+        width: "100%",
+    },
+    gridCell: {
+        flex: 1,
+        borderWidth: 0.5,
+        borderColor: "rgba(255, 255, 255, 1)",
+    },
+    firstCell: {
+        borderLeftWidth: 0,
+    },
+    lastCell: {
+        borderRightWidth: 0,
     },
     previewBackground: {
         flex: 1,
